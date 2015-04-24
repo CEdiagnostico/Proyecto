@@ -1,0 +1,69 @@
+# depslib dependency file v1.0
+1424356862 source:/home/pablo/cpp/Crazy River Rider/objects.cpp
+
+1425145861 source:/home/pablo/cpp/Crazy River Rider/main.cpp
+	<iostream>
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	"gui.h"
+	"terrain.h"
+
+1425152076 /home/pablo/cpp/Crazy River Rider/objects.h
+	"estructurasDeDatos.h"
+
+1425054287 /home/pablo/cpp/Crazy River Rider/estructurasDeDatos.h
+	<iostream>
+	<stdlib.h>
+	<stdio.h>
+
+1425171109 source:/home/pablo/cpp/Crazy River Rider/gui.cpp
+	"gui.h"
+
+1425152746 /home/pablo/cpp/Crazy River Rider/gui.h
+	<iostream>
+	<allegro5/allegro.h>
+	<allegro5/allegro_primitives.h>
+	<allegro5/allegro_image.h>
+	"objects.h"
+	"estructurasDeDatos.h"
+	"constants.h"
+
+1424977955 /home/pablo/cpp/Crazy River Rider/eventos.pb.h
+	<string>
+	<google/protobuf/stubs/common.h>
+	<google/protobuf/generated_message_util.h>
+	<google/protobuf/message.h>
+	<google/protobuf/repeated_field.h>
+	<google/protobuf/extension_set.h>
+	<google/protobuf/unknown_field_set.h>
+
+1424847244 source:/home/pablo/cpp/Crazy River Rider/eventos.pb.cc
+	"eventos.pb.h"
+	<algorithm>
+	<google/protobuf/stubs/common.h>
+	<google/protobuf/stubs/once.h>
+	<google/protobuf/io/coded_stream.h>
+	<google/protobuf/wire_format_lite_inl.h>
+	<google/protobuf/descriptor.h>
+	<google/protobuf/generated_message_reflection.h>
+	<google/protobuf/reflection_ops.h>
+	<google/protobuf/wire_format.h>
+
+1425160297 source:/home/pablo/cpp/Crazy River Rider/terrain.cpp
+	"terrain.h"
+
+1425103210 /home/pablo/cpp/Crazy River Rider/terrain.h
+	<cstdlib>
+	<iostream>
+	"estructurasDeDatos.h"
+	"constants.h"
+	"objects.h"
+
+1424930957 /home/pablo/cpp/Crazy River Rider/constants.h
+
+1425060362 source:/home/pablo/cpp/Crazy River Rider/protohandler.cpp
+	"protohandler.h"
+
+1425057953 /home/pablo/cpp/Crazy River Rider/protohandler.h
+	"eventos.pb.h"
+

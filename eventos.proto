@@ -1,0 +1,8 @@
+package ce;
+message Evento {
+  required string type = 1;
+  optional int32 id = 2;
+  optional String event = 3;
+  optional string x = 4;
+  optional string y = 5;
+}
