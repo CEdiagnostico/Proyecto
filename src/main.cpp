@@ -13,7 +13,8 @@ using namespace std;
 */
 int main() {
     pthread_t socket;
-    pthread_create(&socket, 0, startSocket, GameCreator::create());
+    GameCreator gC;
+    pthread_create(&socket, 0, startSocket, gC.create());
     pthread_join(socket,0);
     return 0;
 }

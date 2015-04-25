@@ -11,7 +11,7 @@
 
 class GameCreator {
     public:
-        static void* create();
+        void* create();
 };
 
 
