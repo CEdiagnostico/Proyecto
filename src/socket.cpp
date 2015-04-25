@@ -18,20 +18,18 @@ void* connection_handler(void* param){
     char client_message[2000];
     char json2[1024];
     jsonWriter writer = jsonWriter();
+    pthread_mutex_lock(&(info->mutex));
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
-        pthread_mutex_lock(&(info->mutex));
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
         for(int i = 0; i<7; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
             writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
             write(sock , json2, strlen(json2));
-            usleep(10000);
         }
         memset(client_message, 0, 2000);
-        pthread_mutex_unlock(&(info->mutex));
-        pthread_cond_signal(&(info->androidCond));
     }
+    pthread_mutex_unlock(&(info->mutex));
     if(read_size == 0){
         puts("Client disconnected");
     }else if(read_size == -1) {
@@ -44,7 +42,6 @@ void* connection_handler(void* param){
 void* threadAndroid(void* param) {
     socketThreadParam* info = static_cast<socketThreadParam*>(param);
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    Updater upd;
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("192.168.0.119");
@@ -61,15 +58,14 @@ void* threadAndroid(void* param) {
     int client_sockfd;
     struct sockaddr_in client_addr;
     socklen_t len = sizeof(client_addr);
-
+    Updater upd;
     /* accept a connection */
     printf("waiting connection...\n");
     client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_addr, &len);
     printf("connection established!\n");
-    pthread_cond_signal(&(info->androidCond));
+    int flag2 = 0;
     while(true){
         pthread_mutex_lock(&(info->mutex));
-        pthread_cond_wait(&(info->androidCond), &(info->mutex));
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
         std::string a = "";
@@ -90,9 +86,14 @@ void* threadAndroid(void* param) {
         }
         (static_cast<Jugador*>(info->getMembers()))->setX(atoi(a.c_str()));
         (static_cast<Jugador*>(info->getMembers()))->setY(atoi(b.c_str()));
-        upd.actualizarObjetos(info->getMembers());
+        if(flag2 == 10){
+        	upd.actualizarObjetos(info->getMembers());
+        	flag2 = 0;
+        }
+        flag2++;
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
+        usleep(1000);
     }
     close(client_sockfd);
     return 0;
