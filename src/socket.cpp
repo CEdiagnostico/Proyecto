@@ -117,19 +117,12 @@ void* threadAndroid(void* param) {
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
         std::string a = "";
-        std::string b = "";
         bool flag=false;
         for(int i=0; i<size; i++){
             if(buffer[i]==35){
-                if(!flag){
-                    flag=true;
-                }else{
                     break;
-                }
-            }else if(!flag){
-                a+=buffer[i];
             }else{
-                b+=buffer[i];
+                a+=buffer[i];
             }
         }
         Jugador* j = static_cast<Jugador*>(info->getMembers());
@@ -138,8 +131,21 @@ void* threadAndroid(void* param) {
         }else if(j->colisiones(info->getMembers())){
             j->changeFlag();
         }else{
-            j->setX(atoi(a.c_str()));
-            j->setY(atoi(b.c_str()));
+            int nPos = atoi(a.c_str());
+            if(nPos<0){
+                if(j->getX() < 3){
+                    nPos = j->getX() + 1;
+                }else{
+                    nPos=3;
+                }
+            }else{
+                if(j->getX() > 1){
+                    nPos = j->getX() - 1;
+                }else{
+                    nPos=1;
+                }
+            }
+            j->setX(nPos);
         }
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
