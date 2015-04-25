@@ -19,12 +19,14 @@ void* connection_handler(void* param){
     int sock = *(info->getSocketDescriptor());
     int read_size;
     char client_message[2000];
+    char msj[1024];
     jsonWriter writer = jsonWriter();
     pthread_mutex_lock(&(info->getMutex()));
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->getAndroidCond()));
         client_message[read_size] = '\0';
-        write(sock , writer.write(0,0,info->getSpeed(),info->getPos()), strlen(json2));
+        writer.write(0,0,info->getSpeed(),info->getPos(), msj);
+        write(sock , msj, strlen(json2));
         memset(client_message, 0, 2000);
         usleep(5000);
     }
@@ -119,7 +121,7 @@ void* startSocket(void* p){
     new(threadParam) socketThreadParam();
     threadParam->setAndroidCond(androidCond);
 
-    pthread_create(&thread_Androir, NULL,  threadAndroid, (void*)threadParam);
+    pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam);
 
     while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) ) {
         pthread_create(&thread_GUI, NULL,  connection_handler, (void*)threadParam);
