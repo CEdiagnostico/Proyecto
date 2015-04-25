@@ -23,7 +23,8 @@
 #include "jsonWriter.h"
 #include "socketThreadParam.h"
 
-void* connection_handler(void* param);
+void* playerHandler(void* param);
+void* objectHandler(void* param);
 void* threadAndroid(void* param);
 void* startSocket(void* p);
 

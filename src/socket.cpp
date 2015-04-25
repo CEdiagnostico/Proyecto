@@ -11,26 +11,50 @@
 
 using namespace rapidjson;
 
-void* connection_handler(void* param){
+void* playerHandler(void* param){
     socketThreadParam* info = static_cast<socketThreadParam*>(param);
     int sock = *(info->getSocketDescriptor());
     int read_size;
     char client_message[2000];
     char json2[1024];
     jsonWriter writer = jsonWriter();
+    Member* player = static_cast<Jugador*>(info->getMembers());
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_mutex_lock(&(info->mutex));
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        for(int i = 0; i<7; i++){
+        writer.write(1, player->getFlag(), player->getX(), player->getY(), json2);
+        write(sock , json2, strlen(json2));
+        memset(client_message, 0, 2000);
+        pthread_mutex_unlock(&(info->mutex));
+    }
+    if(read_size == 0){
+        puts("Client disconnected");
+    }else if(read_size == -1) {
+        perror("recv failed");
+    }
+
+    return 0;
+}
+
+void* objectHandler(void* param){
+    socketThreadParam* info = static_cast<socketThreadParam*>(param);
+    int sock = *(info->getSocketDescriptor());
+    int read_size;
+    char client_message[2000];
+    char json2[1024];
+    jsonWriter writer = jsonWriter();
+    Updater upd;
+    while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+        client_message[read_size] = '\0';
+        for(int i = 1; i<7; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
             writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
             write(sock , json2, strlen(json2));
-            usleep(10000);
+            usleep(100000);
         }
         memset(client_message, 0, 2000);
-        pthread_mutex_unlock(&(info->mutex));
-        pthread_cond_signal(&(info->androidCond));
+        upd.actualizarObjetos(info->getMembers());
     }
     if(read_size == 0){
         puts("Client disconnected");
@@ -44,7 +68,6 @@ void* connection_handler(void* param){
 void* threadAndroid(void* param) {
     socketThreadParam* info = static_cast<socketThreadParam*>(param);
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    Updater upd;
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("192.168.0.119");
@@ -90,7 +113,6 @@ void* threadAndroid(void* param) {
         }
         (static_cast<Jugador*>(info->getMembers()))->setX(atoi(a.c_str()));
         (static_cast<Jugador*>(info->getMembers()))->setY(atoi(b.c_str()));
-        upd.actualizarObjetos(info->getMembers());
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
     }
@@ -99,32 +121,50 @@ void* threadAndroid(void* param) {
 }
 
 void* startSocket(void* p){
-    int socket_desc , client_sock , c;
-    struct sockaddr_in server , client;
-    socket_desc = socket(AF_INET , SOCK_STREAM , 0);
-    if (socket_desc == -1){
+    int playerSocket_desc , playerClient_sock , c, objectSocket_desc , objectClient_sock;
+    struct sockaddr_in server1 , client1, sockaddr_in server2, client2;
+    playerSocket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (playerSocket_desc == -1){
         printf("Could not create socket");
     }
-    puts("Socket created");
-    server.sin_family = AF_INET;
-    server.sin_addr.s_addr = INADDR_ANY;
-    server.sin_port = htons(7777);
-    if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0) {
+    objectSocket_desc = socket(AF_INET , SOCK_STREAM , 0);
+    if (objectSocket_desc == -1){
+        printf("Could not create socket");
+    }
+    puts("Sockets created");
+    server1.sin_family = AF_INET;
+    server1.sin_addr.s_addr = INADDR_ANY;
+    server1.sin_port = htons(7777);
+    server2.sin_family = AF_INET;
+    server2.sin_addr.s_addr = INADDR_ANY;
+    server2.sin_port = htons(7778);
+    if( bind(playerSocket_desc,(struct sockaddr *)&server1 , sizeof(server1)) < 0) {
         perror("bind failed. Error");
     }
-    listen(socket_desc , 3);
-    c = sizeof(struct sockaddr_in);
-    pthread_t thread_GUI, thread_Android;
-
-    socketThreadParam* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
-    new(threadParam) socketThreadParam();
-    pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam);
-    threadParam->setMembers((Member*)p);
-    while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) ) {
-    	threadParam->setSocketDescriptor(&client_sock);
-    	pthread_create(&thread_GUI, NULL,  connection_handler, (void*)threadParam);
+    if( bind(objectSocket_desc,(struct sockaddr *)&server2 , sizeof(server2)) < 0) {
+        perror("bind failed. Error");
     }
-    if (client_sock < 0){
+    listen(playerSocket_desc , 3);
+    listen(objectSocket_desc , 3);
+    c = sizeof(struct sockaddr_in);
+    
+    pthread_t thread_Player, thread_Android, thread_Objects;
+    socketThreadParam* threadParam1 = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    socketThreadParam* threadParam2 = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    new(threadParam1) socketThreadParam();
+    new(threadParam2) socketThreadParam();
+    pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam1);
+    threadParam1->setMembers((Member*)p);
+    threadParam2->setMembers((Member*)p);
+    
+    while( (playerClient_sock = accept(playerSocket_desc, (struct sockaddr *)&client1, (socklen_t*)&c)) 
+            && (objectClient_sock = accept(objectSocket_desc, (struct sockaddr *)&client2, (socklen_t*)&c))){
+    	threadParam1->setSocketDescriptor(&playerClient_sock);
+    	pthread_create(&thread_Player, NULL,  playerHandler, (void*)threadParam1);
+        threadParam2->setSocketDescriptor(&objectClient_sock);
+        pthread_create(&thread_Objects, NULL, playerHandler, (void*)threadParam2);
+    }
+    if (playerClient_sock < 0){
         perror("accept failed");
     }
 }
