@@ -24,10 +24,8 @@ void* connection_handler(void* param){
         client_message[read_size] = '\0';
         for(int i = 0; i<7; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
-            if(tmp->getFlag()){
                 writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
                 write(sock , json2, strlen(json2));
-            }
         }
         memset(client_message, 0, 2000);
     }
