@@ -23,7 +23,8 @@ void* playerHandler(void* param){
     jsonWriter writer = jsonWriter();
     Jugador* player = static_cast<Jugador*>(info->getMembers());
     int cnt = 0;
-    while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+    bool flag = true;
+    while( flag && (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
         if(cnt==10){
@@ -34,6 +35,9 @@ void* playerHandler(void* param){
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
         cnt++;
+        if(player->getCombustible()<=0) {
+            flag=false;
+        }
     }
     if(read_size == 0){
         puts("Client disconnected");
@@ -54,7 +58,8 @@ void* objectHandler(void* param){
     Updater upd;
     int sleep = 10000;
     int cnt =0;
-    while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+    bool flag = true;
+    while( flag && (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         client_message[read_size] = '\0';
         for(int i = 1; i<NUMBER_OF_MEMBERS; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
@@ -62,9 +67,12 @@ void* objectHandler(void* param){
             write(sock , json2, strlen(json2));
             usleep(sleep);
         }
-        if(cnt==10){
+        if(cnt==10 && sleep>=1000){
             sleep -= 100;
             cnt=0;
+        }
+        if(static_cast<Jugador*>(info->getMembers())->getCombustible()<=0){
+            flag=false;
         }
         memset(client_message, 0, 2000);
         upd.actualizarObjetos(info->getMembers());
@@ -125,7 +133,9 @@ void* threadAndroid(void* param) {
             }
         }
         Jugador* j = static_cast<Jugador*>(info->getMembers());
-        if(!(j->colisiones(info->getMembers()))){
+        if(j->getCombustible<=0){
+            cnt=false;
+        }else if(j->colisiones(info->getMembers())){
             j->changeFlag();
         }else{
             j->setX(atoi(a.c_str()));
