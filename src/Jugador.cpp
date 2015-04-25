@@ -10,3 +10,21 @@ Jugador::Jugador(int paramId, int paramX, int paramY){
     y = paramY;
     id = paramId;
 };
+
+bool Jugador::colisiones(Member* lista){
+    for(int i =0; i<7; i++){
+        Member* tmp = (Member*)(lista+i*sizeof(Member));
+        if(tmp->getFlag() && x==tmp->getX()){
+            return true;
+        }
+    }
+    return false;
+};
+
+void Jugador::bajarCombustible(){
+    combustible -= 10;
+};
+
+int Jugador::getCombustible(){
+    return combustible;
+};

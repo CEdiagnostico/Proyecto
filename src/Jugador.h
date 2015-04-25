@@ -8,8 +8,12 @@
 #include "Member.h"
 
 class Jugador: public Member{
+    int combustible;
     public:
         Jugador(int, int, int);
+        bool colisiones(Member*);
+        void bajarCombustible();
+        int getCombustible();
 };
 
 

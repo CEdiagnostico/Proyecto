@@ -6,8 +6,11 @@
 #include "Jugador.h"
 #include "Updater.h"
 
-#define PORT 9500
+#define PORT_ANDROID 9500
 #define MAX_BUFFER 1024
+#define NUMBER_OF_MEMBERS 7
+#define PORT_PLAYER 7777
+#define PORT_OBJECTS 7778
 
 using namespace rapidjson;
 
@@ -16,15 +19,21 @@ void* playerHandler(void* param){
     int sock = *(info->getSocketDescriptor());
     int read_size;
     char client_message[2000];
-    char json2[1024];
+    char json2[MAX_BUFFER];
     jsonWriter writer = jsonWriter();
-    Member* player = static_cast<Jugador*>(info->getMembers());
+    Jugador* player = static_cast<Jugador*>(info->getMembers());
+    int cnt = 0;
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        writer.write(1, player->getFlag(), player->getX(), player->getY(), json2);
+        if(cnt==10){
+            player->bajarCombustible();
+            cnt=0;
+        }
+        writer.write(1, player->getFlag(), player->getX(), player->getCombustible(), json2);
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
+        cnt++;
     }
     if(read_size == 0){
         puts("Client disconnected");
@@ -40,19 +49,26 @@ void* objectHandler(void* param){
     int sock = *(info->getSocketDescriptor());
     int read_size;
     char client_message[2000];
-    char json2[1024];
+    char json2[MAX_BUFFER];
     jsonWriter writer = jsonWriter();
     Updater upd;
+    int sleep = 10000;
+    int cnt =0;
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         client_message[read_size] = '\0';
-        for(int i = 1; i<7; i++){
+        for(int i = 1; i<NUMBER_OF_MEMBERS; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
             writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
             write(sock , json2, strlen(json2));
-            usleep(10000);
+            usleep(sleep);
+        }
+        if(cnt==10){
+            sleep -= 100;
+            cnt=0;
         }
         memset(client_message, 0, 2000);
         upd.actualizarObjetos(info->getMembers());
+        cnt++;
     }
     if(read_size == 0){
         puts("Client disconnected");
@@ -69,7 +85,7 @@ void* threadAndroid(void* param) {
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("192.168.0.119");
-    server_addr.sin_port = htons(PORT);
+    server_addr.sin_port = htons(PORT_ANDROID);
 
     /* bind with the local file */
     bind(server_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
@@ -87,7 +103,8 @@ void* threadAndroid(void* param) {
     printf("waiting connection...\n");
     client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_addr, &len);
     printf("connection established!\n");
-    while(true){
+    bool cnd = true;
+    while(cnd){
         pthread_mutex_lock(&(info->mutex));
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
@@ -107,8 +124,13 @@ void* threadAndroid(void* param) {
                 b+=buffer[i];
             }
         }
-        (static_cast<Jugador*>(info->getMembers()))->setX(atoi(a.c_str()));
-        (static_cast<Jugador*>(info->getMembers()))->setY(atoi(b.c_str()));
+        Jugador* j = static_cast<Jugador*>(info->getMembers());
+        if(!(j->colisiones(info->getMembers()))){
+            j->changeFlag();
+        }else{
+            j->setX(atoi(a.c_str()));
+            j->setY(atoi(b.c_str()));
+        }
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
     }
@@ -130,10 +152,10 @@ void* startSocket(void* p){
     puts("Sockets created");
     server1.sin_family = AF_INET;
     server1.sin_addr.s_addr = INADDR_ANY;
-    server1.sin_port = htons(7777);
+    server1.sin_port = htons(PORT_PLAYER);
     server2.sin_family = AF_INET;
     server2.sin_addr.s_addr = INADDR_ANY;
-    server2.sin_port = htons(7778);
+    server2.sin_port = htons(PORT_OBJECTS);
     if( bind(playerSocket_desc,(struct sockaddr *)&server1 , sizeof(server1)) < 0) {
         perror("bind failed. Error");
     }
@@ -148,7 +170,7 @@ void* startSocket(void* p){
     socketThreadParam1* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
     new(threadParam1) socketThreadParam();
     socketThreadParam2* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
-    new(threadParam2) socketThreadParam()
+    new(threadParam2) socketThreadParam();
     pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam1);
     threadParam1->setMembers((Member*)p);
     threadParam2->setMembers((Member*)p);
