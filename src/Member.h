@@ -13,6 +13,7 @@ class Member {
         int x;
         int y;
         int id;
+        int combustible;
     public:
         void setX(int);
         void setY(int);

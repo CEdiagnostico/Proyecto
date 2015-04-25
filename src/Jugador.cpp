@@ -9,6 +9,7 @@ Jugador::Jugador(int paramId, int paramX, int paramY){
     x = paramX;
     y = paramY;
     id = paramId;
+    combustible = 100;
 };
 
 bool Jugador::colisiones(Member* lista){
@@ -22,7 +23,7 @@ bool Jugador::colisiones(Member* lista){
 };
 
 void Jugador::bajarCombustible(){
-    combustible -= 10;
+    combustible--;
 };
 
 int Jugador::getCombustible(){

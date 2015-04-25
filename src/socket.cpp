@@ -5,6 +5,8 @@
 #include "Member.h"
 #include "Jugador.h"
 #include "Updater.h"
+#include "socketThreadParam.h"
+#include "GameCreator.h"
 
 #define PORT_ANDROID 9500
 #define MAX_BUFFER 1024
@@ -24,7 +26,10 @@ void* playerHandler(void* param){
     Jugador* player = static_cast<Jugador*>(info->getMembers());
     int cnt = 0;
     bool flag = true;
-    while( flag && (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+    while(flag && (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+        if(player->getCombustible()==0 || player->getFlag()==0) {
+            flag=false;
+        }
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
         if(cnt==10){
@@ -35,9 +40,7 @@ void* playerHandler(void* param){
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
         cnt++;
-        if(player->getCombustible()<=0) {
-            flag=false;
-        }
+        std::cout<< json2 <<std::endl;
     }
     if(read_size == 0){
         puts("Client disconnected");
@@ -58,8 +61,8 @@ void* objectHandler(void* param){
     Updater upd;
     int sleep = 10000;
     int cnt =0;
-    bool flag = true;
-    while( flag && (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+    while(  static_cast<Jugador*>(info->getMembers())->getFlag()!=0 &&
+    		(read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         client_message[read_size] = '\0';
         for(int i = 1; i<NUMBER_OF_MEMBERS; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
@@ -68,11 +71,8 @@ void* objectHandler(void* param){
             usleep(sleep);
         }
         if(cnt==10 && sleep>=1000){
-            sleep -= 100;
+            sleep -= 50;
             cnt=0;
-        }
-        if(static_cast<Jugador*>(info->getMembers())->getCombustible()<=0){
-            flag=false;
         }
         memset(client_message, 0, 2000);
         upd.actualizarObjetos(info->getMembers());
@@ -117,7 +117,6 @@ void* threadAndroid(void* param) {
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
         std::string a = "";
-        bool flag=false;
         for(int i=0; i<size; i++){
             if(buffer[i]==35){
                     break;
@@ -126,10 +125,9 @@ void* threadAndroid(void* param) {
             }
         }
         Jugador* j = static_cast<Jugador*>(info->getMembers());
-        if(j->getCombustible<=0){
-            cnt=false;
-        }else if(j->colisiones(info->getMembers())){
-            j->changeFlag();
+        if(j->getCombustible()==0 || j->colisiones(info->getMembers())){
+        	cnd=false;
+        	j->changeFlag();
         }else{
             int nPos = atoi(a.c_str());
             if(nPos<0){
@@ -149,6 +147,7 @@ void* threadAndroid(void* param) {
         }
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
+        usleep(1000);
     }
     close(client_sockfd);
     return 0;
@@ -183,13 +182,15 @@ void* startSocket(void* p){
     c = sizeof(struct sockaddr_in);
     
     pthread_t thread_Player, thread_Android, thread_Objects;
-    socketThreadParam1* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    socketThreadParam* threadParam1 = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
     new(threadParam1) socketThreadParam();
-    socketThreadParam2* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    socketThreadParam* threadParam2 = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
     new(threadParam2) socketThreadParam();
     pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam1);
-    threadParam1->setMembers((Member*)p);
-    threadParam2->setMembers((Member*)p);
+    GameCreator gC;
+    Member* m = (Member*)gC.create();
+    threadParam1->setMembers(m);
+    threadParam2->setMembers(m);
     
     while( (playerClient_sock = accept(playerSocket_desc, (struct sockaddr *)&client1, (socklen_t*)&c)) 
             && (objectClient_sock = accept(objectSocket_desc, (struct sockaddr *)&client2, (socklen_t*)&c))){
@@ -201,4 +202,5 @@ void* startSocket(void* p){
     if (playerClient_sock < 0){
         perror("accept failed");
     }
+    return 0;
 }

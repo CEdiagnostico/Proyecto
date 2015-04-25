@@ -1,7 +1,6 @@
 #include<iostream>
 #include <pthread.h>
 #include "socket.h"
-#include "GameCreator.h"
 
 using namespace std;
 /** @name Crazy River Ride
@@ -13,8 +12,7 @@ using namespace std;
 */
 int main() {
     pthread_t socket;
-    GameCreator gC;
-    pthread_create(&socket, 0, startSocket, gC.create());
-    pthread_join(socket,0);
+    pthread_create(&socket, 0, startSocket, 0);
+    //pthread_join(socket,0);
     return 0;
 }
