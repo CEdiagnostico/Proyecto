@@ -5,7 +5,7 @@
 #ifndef PROYECTO_JUGADOR_H
 #define PROYECTO_JUGADOR_H
 
-#include "Headers/Member.h"
+#include "Member.h"
 
 class Jugador: public Member{
     public:

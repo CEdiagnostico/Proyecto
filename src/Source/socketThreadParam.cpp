@@ -2,7 +2,7 @@
 // Created by roberto on 24/04/15.
 //
 
-#include "Headers/socketThreadParam.h"
+#include "../Headers/socketThreadParam.h"
 
 socketThreadParam::socketThreadParam(){
     socketDesc=0;

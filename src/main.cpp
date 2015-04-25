@@ -13,6 +13,6 @@ using namespace std;
 int main() {
     pthread_t socket;
     pthread_create(&socket, 0, startSocket, 0);
-    //pthread_join(socket,0);
+    pthread_join(socket,0);
     return 0;
 }

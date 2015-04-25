@@ -5,11 +5,12 @@
 #ifndef PROYECTO_GAMECREATOR_H
 #define PROYECTO_GAMECREATOR_H
 
-#include "Headers/Jugador.h"
-#include "Headers/Obstaculo.h"
-#include "Headers/Enemigo.h"
-#include "Headers/Member.h"
-#include "Headers/Constants.h"
+#include "Jugador.h"
+#include "Obstaculo.h"
+#include "Enemigo.h"
+#include "Member.h"
+#include "Constants.h"
+#include "Bala.h"
 #include <iostream>
 
 class GameCreator {

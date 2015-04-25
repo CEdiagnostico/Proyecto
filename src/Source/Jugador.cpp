@@ -2,7 +2,7 @@
 // Created by roberto on 24/04/15.
 //
 
-#include "Jugador.h"
+#include "../Headers/Jugador.h"
 
 Jugador::Jugador(int paramId, int paramX, int paramY){
     active = 1;
@@ -10,7 +10,6 @@ Jugador::Jugador(int paramId, int paramX, int paramY){
     y = paramY;
     id = paramId;
     combustible = 100;
-    disparando = false;
     vida = 10;
 }
 

@@ -5,11 +5,11 @@
 #ifndef PROYECTO_BALA_H
 #define PROYECTO_BALA_H
 
-#include "Headers/Member.h"
+#include "Member.h"
 
 class Bala: public Member{
     public:
-        Bala(int,int);
+        Bala(int,int,int);
         Member* colision(Member*);
 };
 

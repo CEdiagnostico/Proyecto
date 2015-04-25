@@ -16,18 +16,18 @@
 #include <arpa/inet.h>
 #include <stdio.h>
 #include <unistd.h>
-#include "../libs/rapidjson/rapidjson.h"
-#include "../libs/rapidjson/document.h"
-#include "../libs/rapidjson/stringbuffer.h"
-#include "../libs/rapidjson/writer.h"
+#include "../../libs/rapidjson/rapidjson.h"
+#include "../../libs/rapidjson/document.h"
+#include "../../libs/rapidjson/stringbuffer.h"
+#include "../../libs/rapidjson/writer.h"
 #include "jsonWriter.h"
-#include "Headers/socketThreadParam.h"
-#include "Headers/Member.h"
-#include "Headers/Jugador.h"
-#include "Headers/Updater.h"
-#include "Headers/socketThreadParam.h"
-#include "Headers/GameCreator.h"
-#include "Headers/Constants.h"
+#include "socketThreadParam.h"
+#include "Member.h"
+#include "Jugador.h"
+#include "Updater.h"
+#include "socketThreadParam.h"
+#include "GameCreator.h"
+#include "Constants.h"
 
 void* playerHandler(void* param);
 void* objectHandler(void* param);
