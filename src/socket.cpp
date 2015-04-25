@@ -21,8 +21,8 @@ void* connection_handler(void* param){
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        writer.write(((Jugador*)info->getMembers())->getId(),
-        			 ((Jugador*)info->getMembers())->getFlag(),
+        writer.write(((Member*)info->getMembers())->getId(),
+        			 ((Member*)info->getMembers())->getFlag(),
 					 ((Jugador*)info->getMembers())->getX(),
 					 ((Jugador*)info->getMembers())->getY(),
 					 json2);

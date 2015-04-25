@@ -5,14 +5,10 @@
 #include "Jugador.h"
 
 Jugador::Jugador(int paramId, int paramX, int paramY){
-    active = static_cast<int*>(malloc(sizeof(int)));
-    *active = 1;
-    x = static_cast<int*>(malloc(sizeof(int)));
-    *x = paramX;
-    y = static_cast<int*>(malloc(sizeof(int)));
-    *y = paramY;
-    id = static_cast<int*>(malloc(sizeof(int)));
-    *id = paramId;
+    active = 1;
+    x = paramX;
+    y = paramY;
+    id = paramId;
 };
 
 Jugador::~Jugador(){

@@ -5,27 +5,27 @@
 #include "Member.h"
 
 void Member::setX(int newX){
-    *x=newX;
+    x=newX;
 }
 void Member::setY(int newY){
-    *y=newY;
+    y=newY;
 }
 void Member::changeFlag(){
     if(active==0){
-    	*active=1;
+    	active=1;
     }else{
-    	*active=0;
+    	active=0;
     }
 }
 int Member::getX(){
-    return *x;
+    return x;
 }
 int Member::getY(){
-    return *y;
+    return y;
 }
 int Member::getId(){
-    return *id;
+    return id;
 }
 int Member::getFlag(){
-    return *active;
+    return active;
 }

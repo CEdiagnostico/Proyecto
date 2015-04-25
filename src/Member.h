@@ -9,10 +9,10 @@
 
 class Member {
     protected:
-        int* active;
-        int* x;
-        int* y;
-        int* id;
+        int active;
+        int x;
+        int y;
+        int id;
     public:
         void setX(int);
         void setY(int);
