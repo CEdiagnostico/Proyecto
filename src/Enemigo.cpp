@@ -5,19 +5,8 @@
 #include "Enemigo.h"
 
 Enemigo::Enemigo(int paramId, int paramX, int paramY){
-    active = static_cast<int*>(malloc(sizeof(int)));
-    *active = false;
-    x = static_cast<int*>(malloc(sizeof(int)));
-    *x = paramX;
-    y = static_cast<int*>(malloc(sizeof(int)));
-    *y = paramY;
-    id = static_cast<int*>(malloc(sizeof(int)));
-    *id = paramId;
-};
-
-Enemigo::~Enemigo(){
-    free(active);
-    free(x);
-    free(y);
-    free(id);
+    active = 0;
+    x = paramX;
+    y = paramY;
+    id = paramId;
 };

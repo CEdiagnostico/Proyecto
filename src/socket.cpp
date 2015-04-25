@@ -27,7 +27,6 @@ void* connection_handler(void* param){
             if(tmp->getFlag()){
                 writer.write(tmp->getId(), tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
                 write(sock , json2, strlen(json2));
-                std::cout << json2 << std::endl;
             }
         }
         memset(client_message, 0, 2000);

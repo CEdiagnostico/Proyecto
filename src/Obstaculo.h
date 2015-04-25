@@ -10,7 +10,6 @@
 class Obstaculo: public Member{
 public:
     Obstaculo(int, int, int);
-    ~Obstaculo();
 };
 
 

@@ -10,7 +10,6 @@
 class Enemigo: public Member{
 public:
     Enemigo(int, int, int);
-    ~Enemigo();
 };
 
 
