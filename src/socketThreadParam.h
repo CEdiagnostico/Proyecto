@@ -7,6 +7,7 @@
 
 #include <pthread.h>
 #include <cstdlib>
+#include "Member.h"
 
 class socketThreadParam {
 	int* socketDesc;
@@ -16,8 +17,8 @@ class socketThreadParam {
 	pthread_cond_t androidCond;
 	socketThreadParam();
 	void setSocketDescriptor(int*);
-	void setMembers(Members*);
-	Members* getMembers();
+	void setMembers(Member*);
+	Member* getMembers();
 	int* getSocketDescriptor();
 	pthread_mutex_t getMutex();
 	pthread_cond_t getAndroidCond();

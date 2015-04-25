@@ -5,7 +5,9 @@
 #ifndef PROYECTO_GAMECREATOR_H
 #define PROYECTO_GAMECREATOR_H
 
-#include "Member.h"
+#include "Jugador.h"
+#include "Obstaculo.h"
+#include "Enemigo.h"
 
 class GameCreator {
     public:

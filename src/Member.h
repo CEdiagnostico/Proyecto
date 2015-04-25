@@ -5,6 +5,7 @@
 #ifndef PROYECTO_MEMBER_H
 #define PROYECTO_MEMBER_H
 
+#include <cstdlib>
 
 class Member {
     protected:
@@ -13,8 +14,6 @@ class Member {
         int* y;
         int* id;
     public:
-        Member(int,int,int,int);
-        ~Member();
         void setX(int);
         void setY(int);
         void changeFlag();

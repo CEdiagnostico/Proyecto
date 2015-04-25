@@ -4,10 +4,20 @@
 
 #include "Obstaculo.h"
 
-Obstaculo(int paramId, int paramX, int paramY){
-    super(0,paramId,paramX,paramY);
+Obstaculo::Obstaculo(int paramId, int paramX, int paramY){
+    active = static_cast<int*>(malloc(sizeof(int)));
+    *active = false;
+    x = static_cast<int*>(malloc(sizeof(int)));
+    *x = paramX;
+    y = static_cast<int*>(malloc(sizeof(int)));
+    *y = paramY;
+    id = static_cast<int*>(malloc(sizeof(int)));
+    *id = paramId;
 };
 
-~Obstaculo(){
-    ~Member();
+Obstaculo::~Obstaculo(){
+    free(active);
+    free(x);
+    free(y);
+    free(id);
 };

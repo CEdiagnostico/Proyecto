@@ -6,8 +6,6 @@
 
 socketThreadParam::socketThreadParam(){
     socketDesc=0;
-    pos=0;
-    speed=0;
     androidCond = PTHREAD_COND_INITIALIZER;
     mutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -29,10 +27,10 @@ pthread_cond_t socketThreadParam::getAndroidCond(){
     return androidCond;
 }
 
-void socketThreadParam::setMembers(Members* param){
+void socketThreadParam::setMembers(Member* param){
     members = param;
 };
 
-Members* socketThreadParam::getMembers(){
+Member* socketThreadParam::getMembers(){
     return members;
 };
