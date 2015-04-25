@@ -87,6 +87,7 @@ void* threadAndroid(void* param) {
             }
         }
         (static_cast<Jugador*>(info->getMembers()))->setX(atoi(a.c_str()));
+        (static_cast<Jugador*>(info->getMembers()))->setY(atoi(b.c_str()));
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
         usleep(500);

@@ -6,7 +6,7 @@
 
 Jugador::Jugador(int paramId, int paramX, int paramY){
     active = static_cast<int*>(malloc(sizeof(int)));
-    *active = false;
+    *active = 1;
     x = static_cast<int*>(malloc(sizeof(int)));
     *x = paramX;
     y = static_cast<int*>(malloc(sizeof(int)));
