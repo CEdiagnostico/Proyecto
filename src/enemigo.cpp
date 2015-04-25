@@ -1,5 +1,6 @@
 # include "../headers/enemigo.h"
 #include <iostream>
+#include <stdlib.h>
 #include <iomanip>
 #include <string>
 #include <map>
@@ -129,10 +130,10 @@ void Enemigo::disparar() {
  *
  */
 short int Enemigo::calcularVida() {
-	random_device rd;
-	mt19937 gen(rd());
-	normal_distribution<> d(3);
-	int num = d(gen);
-	return num;
+//	random_device rd;
+//	mt19937 gen(rd());
+//	normal_distribution<> d(3);
+//	int num = d(gen);
+	return 5;
 }
 ;

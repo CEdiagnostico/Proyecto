@@ -1,5 +1,5 @@
 #include"../headers/gui.h"
-#include "protohandler.h"
+//#include "protohandler.h"
 
 
 using namespace std;
@@ -140,5 +140,5 @@ void Gui::drawTerrain()
 }
 
 void Gui::receive(std::string message) {
-    StructEvento evento = proto::readEvent(message);
+    //StructEvento evento = proto::readEvent(message);
 }

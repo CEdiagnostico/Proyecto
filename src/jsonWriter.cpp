@@ -3,26 +3,32 @@
 //
 
 #include "jsonWriter.h"
+#include "../libs/rapidjson/rapidjson.h"
+#include "../libs/rapidjson/document.h"
+#include "../libs/rapidjson/stringbuffer.h"
+#include "../libs/rapidjson/writer.h"
+#include <cstdlib>
+#include <string>
 
-char* jsonWriter::write(int id, int type, int x, int y){
+using namespace rapidjson;
+
+void jsonWriter::write(int id, int type, int x, int y, char json2[1024]){
     char *message = static_cast<char*>(malloc(sizeof(char)*1000));
     Document document;
-    const char* json = "{\"Receptor\":\"0\", \"Tipo\":\"0\", \"X\":\"0\", \"Y\":0}";
+    const char* json = "{\"Receptor\":\"0\", \"Tipo\":\"0\", \"X\":\"0\", \"Y\":\"0\"}";
     document.Parse<0>(json);
 
-    rapidjson::Value& s = document["Receptor"];
-    s.SetInt(id);
-    s = document["Tipo"];
-    s.SetInt(type);
-    s = document["X"];
-    s.SetInt(x);
-    s = document["Y"];
-    s.SetInt(y);
+    rapidjson::Value& a = document["Receptor"];
+    a.SetInt(id);
+    rapidjson::Value& b= document["Tipo"];
+    b.SetInt(type);
+    rapidjson::Value& c = document["X"];
+    c.SetInt(x);
+    rapidjson::Value& d = document["Y"];
+    d.SetInt(y);
 
     rapidjson::StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
     document.Accept(writer);
-    char* json2 = static_cast<char*>(malloc(sizeof(char)*1024));
-    strcpy(*json2, buffer.GetString());
-    return json;
+    strcpy(json2, buffer.GetString());
 };
