@@ -21,13 +21,14 @@ void* connection_handler(void* param){
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        writer.write(((Member*)info->getMembers())->getId(),
-        			 ((Member*)info->getMembers())->getFlag(),
-					 ((Member*)info->getMembers())->getX(),
-					 ((Member*)info->getMembers())->getY(),
+        writer.write(((Jugador*)info->getMembers())->getId(),
+        			 ((Jugador*)info->getMembers())->getFlag(),
+					 ((Jugador*)info->getMembers())->getX(),
+					 ((Jugador*)info->getMembers())->getY(),
 					 json2);
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
+        std::cout << "envia " << json2 << std::endl;
     }
     pthread_mutex_unlock(&(info->mutex));
     if(read_size == 0){
