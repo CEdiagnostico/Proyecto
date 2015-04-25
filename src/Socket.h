@@ -126,23 +126,17 @@ int main(int argc , char *argv[])
         client_message[read_size] = '\0';
         printf("Got %d bytes: %s\n", read_size, client_message);
 
-        //Send the message back to client
         char json[1024];
         strcpy(json, buffer.GetString());
         write(sock , json , strlen(json));
 
-        //clear the message buffer
         memset(client_message, 0, 2000);
         usleep(5000);
     }
 
-    if(read_size == 0)
-    {
+    if(read_size == 0){
         puts("Client disconnected");
-        //fflush(stdout);
-    }
-    else if(read_size == -1)
-    {
+    }else if(read_size == -1) {
         perror("recv failed");
     }
 

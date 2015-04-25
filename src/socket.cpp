@@ -12,18 +12,24 @@
 #include "../libs/rapidjson/stringbuffer.h"
 #include "../libs/rapidjson/writer.h"
 #include "jsonWriter.h"
+#include "socketThreadParam.h"
 
-void *connection_handler(void *socket_desc){
-    int sock = *static_cast<int*>(socket_desc);
+void* connection_handler(void* param){
+    socketThreadParam info = static_cast<socketThreadParam*>(param);
+    int sock = *(info->getSocketDescriptor());
     int read_size;
     char client_message[2000];
     jsonWriter writer = jsonWriter();
+    pthread_mutex_lock(&(info->getMutex()));
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+        pthread_cond_wait(&(info->getAndroidCond()));
         client_message[read_size] = '\0';
-        write(sock , writer.write(0,0,0,0), strlen(json2));
+        write(sock , writer.write(0,0,info->getSpeed(),info->getPos()), strlen(json2));
         memset(client_message, 0, 2000);
         usleep(5000);
     }
+
+    pthread_mutex_unlock(&(info->getMutex()));
 
     if(read_size == 0){
         puts("Client disconnected");
@@ -32,60 +38,94 @@ void *connection_handler(void *socket_desc){
     }
 
     return 0;
-};
+}
 
-void* startSocket(void*){
+
+
+void* threadAndroid(void* param) {
+    socketThreadParam info = static_cast<socketThreadParam*>(param);
+    int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+    struct sockaddr_in server_addr;
+    server_addr.sin_family = AF_INET;
+    server_addr.sin_addr.s_addr = inet_addr("192.168.0.164");
+    server_addr.sin_port = htons(PORT);
+
+    /* bind with the local file */
+    bind(server_sockfd, (struct sockaddr *)&server_addr, sizeof(server_addr));
+
+    /* listen */
+    listen(server_sockfd, 5);
+
+    int size;
+    char buffer[MAX_BUFFER + 1];
+    int client_sockfd;
+    struct sockaddr_in client_addr;
+    socklen_t len = sizeof(client_addr);
+
+    /* accept a connection */
+    printf("waiting connection...\n");
+    client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_addr, &len);
+    printf("connection established!\n");
+
+    pthread_mutex_lock(&(info->getMutex()));
+    while(true){
+        size = read(client_sockfd, buffer, MAX_BUFFER);
+        buffer[size] = '\0';
+        std::string a = "";
+        std::string b = "";
+        bool flag=false;
+        for(int i=0; i<size; i++){
+            if(buffer[i]==35){
+                if(!flag){
+                    flag=true;
+                }else{
+                    break;
+                }
+            }else if(!flag){
+                a+=buffer[i];
+            }else{
+                b+=buffer[i];
+            }
+        }
+        info->setPos(atoi(a.c_str()));
+        info->setSpeed(atoi(b.c_str()));
+        pthread_cond_signal(&(info->getAndroidCond()));
+    }
+    pthread_mutex_lock(&(info->getMutex()));
+    close(client_sockfd);
+    return 0;
+}
+
+void* startSocket(void* p){
     int socket_desc , client_sock , c;
     struct sockaddr_in server , client;
-
-    //Create socket
     socket_desc = socket(AF_INET , SOCK_STREAM , 0);
-    if (socket_desc == -1)
-    {
+    if (socket_desc == -1){
         printf("Could not create socket");
     }
     puts("Socket created");
-
-    //Prepare the sockaddr_in structure
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = INADDR_ANY;
     server.sin_port = htons(7777);
-
-    //Bind
-    if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0)
-    {
-        //print the error message
+    if( bind(socket_desc,(struct sockaddr *)&server , sizeof(server)) < 0) {
         perror("bind failed. Error");
-
     }
-    //puts("bind done");
-
-    //Listen
     listen(socket_desc , 3);
-
-    //Accept and incoming connection
-
     c = sizeof(struct sockaddr_in);
-    pthread_t thread_id;
+    pthread_t thread_GUI, thread_Android;
 
-    while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) )
-    {
-        //puts("Connection accepted");
+    socketThreadParam* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    new(threadParam) socketThreadParam();
+    threadParam->setAndroidCond(androidCond);
 
-        if( pthread_create( &thread_id , NULL ,  connection_handler , (void*) &client_sock) < 0)
-        {
-            //  perror("could not create thread");
+    pthread_create(&thread_Androir, NULL,  threadAndroid, (void*)threadParam);
 
-        }
-
-        //Now join the thread , so that we dont terminate before the thread
-        //pthread_join( thread_id , NULL);
-        // puts("Handler assigned");
+    while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) ) {
+        pthread_create(&thread_GUI, NULL,  connection_handler, (void*)threadParam);
     }
 
-    if (client_sock < 0)
-    {
+    if (client_sock < 0){
         perror("accept failed");
-
     }
-};
+}
