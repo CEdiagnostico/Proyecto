@@ -49,7 +49,7 @@ void* objectHandler(void* param){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
             writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
             write(sock , json2, strlen(json2));
-            usleep(100000);
+            usleep(10000);
         }
         memset(client_message, 0, 2000);
         upd.actualizarObjetos(info->getMembers());
@@ -141,21 +141,24 @@ void* startSocket(void* p){
         perror("bind failed. Error");
     }
     listen(playerSocket_desc , 3);
-    listen(objectSocket_desc , 3);
+    listen(objectSocket_desc , 4);
     c = sizeof(struct sockaddr_in);
     
     pthread_t thread_Player, thread_Android, thread_Objects;
-    socketThreadParam* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
-    new(threadParam) socketThreadParam();
-    pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam);
-    threadParam->setMembers((Member*)p);
+    socketThreadParam1* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    new(threadParam1) socketThreadParam();
+    socketThreadParam2* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
+    new(threadParam2) socketThreadParam()
+    pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam1);
+    threadParam1->setMembers((Member*)p);
+    threadParam2->setMembers((Member*)p);
     
     while( (playerClient_sock = accept(playerSocket_desc, (struct sockaddr *)&client1, (socklen_t*)&c)) 
             && (objectClient_sock = accept(objectSocket_desc, (struct sockaddr *)&client2, (socklen_t*)&c))){
     	threadParam1->setSocketDescriptor(&playerClient_sock);
-    	pthread_create(&thread_Player, NULL,  playerHandler, (void*)threadParam);
         threadParam2->setSocketDescriptor(&objectClient_sock);
-        pthread_create(&thread_Objects, NULL, objectHandler, (void*)threadParam);
+    	pthread_create(&thread_Player, NULL,  playerHandler, (void*)threadParam1);
+        pthread_create(&thread_Objects, NULL, objectHandler, (void*)threadParam2);
     }
     if (playerClient_sock < 0){
         perror("accept failed");
