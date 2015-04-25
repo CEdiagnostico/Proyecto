@@ -14,7 +14,7 @@ Jugador::Jugador(int paramId, int paramX, int paramY){
 bool Jugador::colisiones(Member* lista){
     for(int i =0; i<7; i++){
         Member* tmp = (Member*)(lista+i*sizeof(Member));
-        if(tmp->getFlag() && x==tmp->getX()){
+        if(tmp->getFlag() && x==tmp->getX() && 5==tmp->getY()){
             return true;
         }
     }
