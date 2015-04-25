@@ -1,0 +1,14 @@
+//
+// Created by roberto on 25/04/15.
+//
+
+#ifndef PROYECTO_CONSTANTS_H
+#define PROYECTO_CONSTANTS_H
+
+#define PORT_ANDROID 9500
+#define MAX_BUFFER 1024
+#define NUMBER_OF_MEMBERS 8
+#define PORT_PLAYER 7777
+#define PORT_OBJECTS 7778
+
+#endif //PROYECTO_CONSTANTS_H

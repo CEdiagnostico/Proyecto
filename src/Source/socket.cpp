@@ -1,18 +1,8 @@
 //
 // Created by roberto on 24/04/15.
 //
-#include "socket.h"
-#include "Member.h"
-#include "Jugador.h"
-#include "Updater.h"
-#include "socketThreadParam.h"
-#include "GameCreator.h"
 
-#define PORT_ANDROID 9500
-#define MAX_BUFFER 1024
-#define NUMBER_OF_MEMBERS 7
-#define PORT_PLAYER 7777
-#define PORT_OBJECTS 7778
+#include "Headers/socket.h"
 
 using namespace rapidjson;
 
@@ -36,7 +26,7 @@ void* playerHandler(void* param){
             player->bajarCombustible();
             cnt=0;
         }
-        writer.write(1, player->getFlag(), player->getX(), player->getCombustible(), json2);
+        writer.writeP(1, player->getFlag(), player->getX(), player->getCombustible(), player->getVida(), json2);
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
         cnt++;
@@ -73,7 +63,7 @@ void* objectHandler(void* param){
         if(cnt==10 && sleep>=1000){
             sleep -= 50;
             cnt=0;
-        }
+        }        
         memset(client_message, 0, 2000);
         upd.actualizarObjetos(info->getMembers());
         cnt++;
@@ -125,22 +115,35 @@ void* threadAndroid(void* param) {
             }
         }
         Jugador* j = static_cast<Jugador*>(info->getMembers());
-        if(j->getCombustible()==0 || j->colisiones(info->getMembers())){
-        	cnd=false;
-        	j->changeFlag();
+        if(j->getCombustible()==0){
+            cnd=false;
+            j->changeFlag();
+        }
+        else if(j->colisiones(info->getMembers())){
+            j->bajarVida();
+            if(j->getVida() == 0){
+                cnd=false;
+                j->changeFlag();
+            }
         }else{
-            int nPos = atoi(a.c_str());
-            if(nPos<0){
-                if(j->getX() < 3){
+            int nPos=j->getX();
+            if(buffer[0]=='R'){
+                if(nPos < 3){
                     nPos = j->getX() + 1;
                 }else{
                     nPos=3;
                 }
-            }else{
-                if(j->getX() > 1){
+            }else if(buffer[0]=='L'){
+                if(nPos > 1){
                     nPos = j->getX() - 1;
                 }else{
                     nPos=1;
+                }
+            }else if(buffer[0]=='F'){
+                Bala* b = static_cast<Bala*>(info->getMembers()+7*sizeof(Member));
+                if(!(b->getFlag())){
+                    b->setX(nPos);
+                    b->changeFlag();
                 }
             }
             j->setX(nPos);

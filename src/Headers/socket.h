@@ -21,7 +21,13 @@
 #include "../libs/rapidjson/stringbuffer.h"
 #include "../libs/rapidjson/writer.h"
 #include "jsonWriter.h"
-#include "socketThreadParam.h"
+#include "Headers/socketThreadParam.h"
+#include "Headers/Member.h"
+#include "Headers/Jugador.h"
+#include "Headers/Updater.h"
+#include "Headers/socketThreadParam.h"
+#include "Headers/GameCreator.h"
+#include "Headers/Constants.h"
 
 void* playerHandler(void* param);
 void* objectHandler(void* param);

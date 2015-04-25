@@ -7,7 +7,7 @@
 
 #include <pthread.h>
 #include <cstdlib>
-#include "Member.h"
+#include "Headers/Member.h"
 
 class socketThreadParam {
 	int* socketDesc;

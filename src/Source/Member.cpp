@@ -2,7 +2,7 @@
 // Created by roberto on 24/04/15.
 //
 
-#include "Member.h"
+#include "Headers/Member.h"
 
 void Member::setX(int newX){
     x=newX;

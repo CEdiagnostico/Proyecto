@@ -5,7 +5,7 @@
 #ifndef PROYECTO_ENEMIGO_H
 #define PROYECTO_ENEMIGO_H
 
-#include "Member.h"
+#include "Headers/Member.h"
 
 class Enemigo: public Member{
 public:

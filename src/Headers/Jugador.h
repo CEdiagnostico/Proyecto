@@ -5,7 +5,7 @@
 #ifndef PROYECTO_JUGADOR_H
 #define PROYECTO_JUGADOR_H
 
-#include "Member.h"
+#include "Headers/Member.h"
 
 class Jugador: public Member{
     public:
@@ -13,6 +13,8 @@ class Jugador: public Member{
         bool colisiones(Member*);
         void bajarCombustible();
         int getCombustible();
+        void bajarVida();
+        int getVida();
 };
 
 

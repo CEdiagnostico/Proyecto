@@ -5,7 +5,7 @@
 #ifndef PROYECTO_OBSTACULO_H
 #define PROYECTO_OBSTACULO_H
 
-#include "Member.h"
+#include "Headers/Member.h"
 
 class Obstaculo: public Member{
 public:

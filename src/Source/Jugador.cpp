@@ -10,7 +10,9 @@ Jugador::Jugador(int paramId, int paramX, int paramY){
     y = paramY;
     id = paramId;
     combustible = 100;
-};
+    disparando = false;
+    vida = 10;
+}
 
 bool Jugador::colisiones(Member* lista){
     for(int i =0; i<7; i++){
@@ -20,12 +22,20 @@ bool Jugador::colisiones(Member* lista){
         }
     }
     return false;
-};
+}
 
 void Jugador::bajarCombustible(){
     combustible--;
-};
+}
 
 int Jugador::getCombustible(){
     return combustible;
-};
+}
+
+void Jugador::bajarVida(){
+    vida--;
+}
+
+int Jugador::getVida(){
+    return vida;
+}

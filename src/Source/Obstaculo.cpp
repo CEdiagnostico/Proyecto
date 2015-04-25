@@ -2,7 +2,7 @@
 // Created by roberto on 24/04/15.
 //
 
-#include "Obstaculo.h"
+#include "Headers/Obstaculo.h"
 
 Obstaculo::Obstaculo(int paramId, int paramX, int paramY){
     active = false;

@@ -14,6 +14,7 @@ class Member {
         int y;
         int id;
         int combustible;
+        int vida;
     public:
         void setX(int);
         void setY(int);
