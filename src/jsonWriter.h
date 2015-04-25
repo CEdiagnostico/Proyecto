@@ -8,7 +8,8 @@
 #include "List.h"
 
 class jsonWriter {
-    void write(int,int,int,int,char*);
+public:
+    void write(int,int,int,int,char[]);
 };
 
 

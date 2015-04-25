@@ -1,38 +1,29 @@
 //
 // Created by roberto on 24/04/15.
 //
-
 #include "socket.h"
-#include <iostream>
-#include <sys/socket.h>
-#include <netinet/in.h>
-#include <sys/stat.h>
-#include "../libs/rapidjson/rapidjson.h"
-#include "../libs/rapidjson/document.h"
-#include "../libs/rapidjson/stringbuffer.h"
-#include "../libs/rapidjson/writer.h"
-#include "jsonWriter.h"
-#include "socketThreadParam.h"
+
+#define PORT 9500
+#define MAX_BUFFER 1024
+
+using namespace rapidjson;
 
 void* connection_handler(void* param){
-    socketThreadParam info = static_cast<socketThreadParam*>(param);
+    socketThreadParam* info = static_cast<socketThreadParam*>(param);
     int sock = *(info->getSocketDescriptor());
     int read_size;
     char client_message[2000];
-    char msj[1024];
+    char json2[1024];
     jsonWriter writer = jsonWriter();
-    pthread_mutex_lock(&(info->getMutex()));
+    pthread_mutex_lock(&(info->mutex));
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
-        pthread_cond_wait(&(info->getAndroidCond()));
+        pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        writer.write(0,0,info->getSpeed(),info->getPos(), msj);
-        write(sock , msj, strlen(json2));
+        writer.write(0,0,info->getSpeed(),info->getPos(), json2);
+        write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
-        usleep(5000);
     }
-
-    pthread_mutex_unlock(&(info->getMutex()));
-
+    pthread_mutex_unlock(&(info->mutex));
     if(read_size == 0){
         puts("Client disconnected");
     }else if(read_size == -1) {
@@ -45,12 +36,12 @@ void* connection_handler(void* param){
 
 
 void* threadAndroid(void* param) {
-    socketThreadParam info = static_cast<socketThreadParam*>(param);
+    socketThreadParam* info = static_cast<socketThreadParam*>(param);
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
 
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_addr.s_addr = inet_addr("192.168.0.164");
+    server_addr.sin_addr.s_addr = inet_addr("192.168.0.119");
     server_addr.sin_port = htons(PORT);
 
     /* bind with the local file */
@@ -70,8 +61,8 @@ void* threadAndroid(void* param) {
     client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_addr, &len);
     printf("connection established!\n");
 
-    pthread_mutex_lock(&(info->getMutex()));
     while(true){
+        pthread_mutex_lock(&(info->mutex));
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
         std::string a = "";
@@ -92,9 +83,10 @@ void* threadAndroid(void* param) {
         }
         info->setPos(atoi(a.c_str()));
         info->setSpeed(atoi(b.c_str()));
-        pthread_cond_signal(&(info->getAndroidCond()));
+        pthread_mutex_unlock(&(info->mutex));
+        pthread_cond_signal(&(info->androidCond));
+        usleep(500);
     }
-    pthread_mutex_lock(&(info->getMutex()));
     close(client_sockfd);
     return 0;
 }
@@ -119,14 +111,14 @@ void* startSocket(void* p){
 
     socketThreadParam* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
     new(threadParam) socketThreadParam();
-    threadParam->setAndroidCond(androidCond);
-
     pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam);
 
     while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) ) {
-        pthread_create(&thread_GUI, NULL,  connection_handler, (void*)threadParam);
+    	threadParam->setSocketDescriptor(&client_sock);
+    	pthread_create(&thread_GUI, NULL,  connection_handler, (void*)threadParam);
     }
 
+    std::cout<< "a";
     if (client_sock < 0){
         perror("accept failed");
     }

@@ -3,8 +3,6 @@
 //
 
 #include "socketThreadParam.h"
-#include <pthread.h>
-#include <cstdlib>
 
 socketThreadParam::socketThreadParam(){
     socketDesc=0;

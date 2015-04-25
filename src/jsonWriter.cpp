@@ -12,7 +12,7 @@
 
 using namespace rapidjson;
 
-void jsonWriter::write(int id, int type, int x, int y, char json2[1024]){
+void jsonWriter::write(int id, int type, int x, int y, char json2[]){
     Document document;
     const char* json = "{\"Receptor\":\"0\", \"Tipo\":\"0\", \"X\":\"0\", \"Y\":\"0\"}";
     document.Parse<0>(json);
