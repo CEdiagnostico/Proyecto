@@ -17,24 +17,8 @@ void socketThreadParam::setSocketDescriptor(int* param){
     socketDesc = param;
 }
 
-void socketThreadParam::setPos(int param){
-    pos = param;
-}
-
-void socketThreadParam::setSpeed(int param){
-    speed = param;
-}
-
 int* socketThreadParam::getSocketDescriptor(){
     return socketDesc;
-}
-
-int socketThreadParam::getPos(){
-    return pos;
-}
-
-int socketThreadParam::getSpeed(){
-    return speed;
 }
 
 pthread_mutex_t socketThreadParam::getMutex(){
@@ -44,3 +28,11 @@ pthread_mutex_t socketThreadParam::getMutex(){
 pthread_cond_t socketThreadParam::getAndroidCond(){
     return androidCond;
 }
+
+void socketThreadParam::setMembers(Members* param){
+    members = param;
+};
+
+Members* socketThreadParam::getMembers(){
+    return members;
+};

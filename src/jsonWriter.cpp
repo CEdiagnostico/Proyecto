@@ -12,15 +12,15 @@
 
 using namespace rapidjson;
 
-void jsonWriter::write(int id, int type, int x, int y, char json2[]){
+void jsonWriter::write(int id, int flag, int x, int y, char json2[]){
     Document document;
-    const char* json = "{\"Receptor\":\"0\", \"Tipo\":\"0\", \"X\":\"0\", \"Y\":\"0\"}";
+    const char* json = "{\"Receptor\":\"0\", \"Flag\":\"0\", \"X\":\"0\", \"Y\":\"0\"}";
     document.Parse<0>(json);
 
     rapidjson::Value& a = document["Receptor"];
     a.SetInt(id);
-    rapidjson::Value& b= document["Tipo"];
-    b.SetInt(type);
+    rapidjson::Value& b= document["Flag"];
+    b.SetInt(flag);
     rapidjson::Value& c = document["X"];
     c.SetInt(x);
     rapidjson::Value& d = document["Y"];

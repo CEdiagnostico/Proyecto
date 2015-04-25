@@ -2,6 +2,7 @@
 // Created by roberto on 24/04/15.
 //
 #include "socket.h"
+#include "Member.h"
 
 #define PORT 9500
 #define MAX_BUFFER 1024
@@ -19,7 +20,7 @@ void* connection_handler(void* param){
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        writer.write(0,0,info->getSpeed(),info->getPos(), json2);
+        writer.write((info->getMembers())->getId(),(info->getMembers())->getFlag(),info->getMembers()->getX(),info->getMembers()->getY(), json2);
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
     }
@@ -32,8 +33,6 @@ void* connection_handler(void* param){
 
     return 0;
 }
-
-
 
 void* threadAndroid(void* param) {
     socketThreadParam* info = static_cast<socketThreadParam*>(param);
@@ -81,8 +80,7 @@ void* threadAndroid(void* param) {
                 b+=buffer[i];
             }
         }
-        info->setPos(atoi(a.c_str()));
-        info->setSpeed(atoi(b.c_str()));
+        static_cast<Jugador*>(info->getMembers())->setX(atoi(a.c_str()));
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
         usleep(500);
@@ -112,13 +110,11 @@ void* startSocket(void* p){
     socketThreadParam* threadParam = static_cast<socketThreadParam*>(malloc(sizeof(socketThreadParam)));
     new(threadParam) socketThreadParam();
     pthread_create(&thread_Android, NULL,  threadAndroid, (void*)threadParam);
-
+    threadParam->setMembers((Member*)p);
     while( (client_sock = accept(socket_desc, (struct sockaddr *)&client, (socklen_t*)&c)) ) {
     	threadParam->setSocketDescriptor(&client_sock);
     	pthread_create(&thread_GUI, NULL,  connection_handler, (void*)threadParam);
     }
-
-    std::cout<< "a";
     if (client_sock < 0){
         perror("accept failed");
     }

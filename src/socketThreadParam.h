@@ -10,19 +10,15 @@
 
 class socketThreadParam {
 	int* socketDesc;
-	int pos;
-	int speed;
+	Member* members;
 	public:
 	pthread_mutex_t mutex;
 	pthread_cond_t androidCond;
-
 	socketThreadParam();
 	void setSocketDescriptor(int*);
-	void setPos(int);
-	void setSpeed(int);
+	void setMembers(Members*);
+	Members* getMembers();
 	int* getSocketDescriptor();
-	int getPos();
-	int getSpeed();
 	pthread_mutex_t getMutex();
 	pthread_cond_t getAndroidCond();
 };
