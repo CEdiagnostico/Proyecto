@@ -19,15 +19,15 @@ void* playerHandler(void* param){
     char json2[1024];
     jsonWriter writer = jsonWriter();
     Member* player = static_cast<Jugador*>(info->getMembers());
+    pthread_mutex_lock(&(info->mutex));
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
-        pthread_mutex_lock(&(info->mutex));
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
         writer.write(1, player->getFlag(), player->getX(), player->getY(), json2);
         write(sock , json2, strlen(json2));
         memset(client_message, 0, 2000);
-        pthread_mutex_unlock(&(info->mutex));
     }
+    pthread_mutex_unlock(&(info->mutex));
     if(read_size == 0){
         puts("Client disconnected");
     }else if(read_size == -1) {
@@ -89,10 +89,8 @@ void* threadAndroid(void* param) {
     printf("waiting connection...\n");
     client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_addr, &len);
     printf("connection established!\n");
-    pthread_cond_signal(&(info->androidCond));
     while(true){
         pthread_mutex_lock(&(info->mutex));
-        pthread_cond_wait(&(info->androidCond), &(info->mutex));
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
         std::string a = "";
@@ -122,7 +120,7 @@ void* threadAndroid(void* param) {
 
 void* startSocket(void* p){
     int playerSocket_desc , playerClient_sock , c, objectSocket_desc , objectClient_sock;
-    struct sockaddr_in server1 , client1, sockaddr_in server2, client2;
+    struct sockaddr_in server1 , client1, server2, client2;
     playerSocket_desc = socket(AF_INET , SOCK_STREAM , 0);
     if (playerSocket_desc == -1){
         printf("Could not create socket");
