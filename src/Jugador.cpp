@@ -10,10 +10,3 @@ Jugador::Jugador(int paramId, int paramX, int paramY){
     y = paramY;
     id = paramId;
 };
-
-Jugador::~Jugador(){
-    free(active);
-    free(x);
-    free(y);
-    free(id);
-};

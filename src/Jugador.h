@@ -10,7 +10,6 @@
 class Jugador: public Member{
     public:
         Jugador(int, int, int);
-        ~Jugador();
 };
 
 

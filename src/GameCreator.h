@@ -8,6 +8,8 @@
 #include "Jugador.h"
 #include "Obstaculo.h"
 #include "Enemigo.h"
+#include "Member.h"
+#include <iostream>
 
 class GameCreator {
     public:

@@ -16,7 +16,7 @@ void Updater::actualizarObjetos(Member* lista){
         if(tmp->getFlag()){
             if(tmp->getY()<5){
                 tmp->setY(tmp->getY()+1);
-                active++;
+                actives++;
             }else{
                 tmp->changeFlag();
             }
@@ -25,9 +25,10 @@ void Updater::actualizarObjetos(Member* lista){
     while(actives<3){
         Member* tmp = static_cast<Member*>(lista + (rand()%6+1)*sizeof(Member));
         if(!(tmp->getFlag())){
-            tmp->setY(0);
+            tmp->setY(1);
             tmp->setX(rand()%3+1);
             tmp->changeFlag();
+            actives++;
         }
     }
 }
