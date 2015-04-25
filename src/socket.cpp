@@ -18,18 +18,20 @@ void* connection_handler(void* param){
     char client_message[2000];
     char json2[1024];
     jsonWriter writer = jsonWriter();
-    pthread_mutex_lock(&(info->mutex));
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
+        pthread_mutex_lock(&(info->mutex));
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
         for(int i = 0; i<7; i++){
             Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
-                writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
-                write(sock , json2, strlen(json2));
+            writer.write(i+1, tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
+            write(sock , json2, strlen(json2));
+            usleep(10000);
         }
         memset(client_message, 0, 2000);
+        pthread_mutex_unlock(&(info->mutex));
+        pthread_cond_signal(&(info->androidCond));
     }
-    pthread_mutex_unlock(&(info->mutex));
     if(read_size == 0){
         puts("Client disconnected");
     }else if(read_size == -1) {
@@ -64,9 +66,10 @@ void* threadAndroid(void* param) {
     printf("waiting connection...\n");
     client_sockfd = accept(server_sockfd, (struct sockaddr *)&client_addr, &len);
     printf("connection established!\n");
-
+    pthread_cond_signal(&(info->androidCond));
     while(true){
         pthread_mutex_lock(&(info->mutex));
+        pthread_cond_wait(&(info->androidCond), &(info->mutex));
         size = read(client_sockfd, buffer, MAX_BUFFER);
         buffer[size] = '\0';
         std::string a = "";
@@ -90,7 +93,6 @@ void* threadAndroid(void* param) {
         upd.actualizarObjetos(info->getMembers());
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
-        usleep(500);
     }
     close(client_sockfd);
     return 0;
