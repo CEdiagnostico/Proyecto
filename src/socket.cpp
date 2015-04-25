@@ -4,6 +4,7 @@
 #include "socket.h"
 #include "Member.h"
 #include "Jugador.h"
+#include "Updater.h"
 
 #define PORT 9500
 #define MAX_BUFFER 1024
@@ -21,14 +22,12 @@ void* connection_handler(void* param){
     while( (read_size = recv(sock , client_message , 2000 , 0)) > 0 ) {
         pthread_cond_wait(&(info->androidCond), &(info->mutex));
         client_message[read_size] = '\0';
-        writer.write(((Member*)info->getMembers())->getId(),
-        			 ((Member*)info->getMembers())->getFlag(),
-					 ((Jugador*)info->getMembers())->getX(),
-					 ((Jugador*)info->getMembers())->getY(),
-					 json2);
-        write(sock , json2, strlen(json2));
+        for(int i = 0; i<7; i++){
+            Member* tmp = static_cast<Member*>(info->getMembers() + i*sizeof(Member));
+            writer.write(tmp->getId(), tmp->getFlag(), tmp->getX(), tmp->getY(), json2);
+            write(sock , json2, strlen(json2));
+        }
         memset(client_message, 0, 2000);
-        std::cout << "envia " << json2 << std::endl;
     }
     pthread_mutex_unlock(&(info->mutex));
     if(read_size == 0){
@@ -43,7 +42,7 @@ void* connection_handler(void* param){
 void* threadAndroid(void* param) {
     socketThreadParam* info = static_cast<socketThreadParam*>(param);
     int server_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-
+    Updater upd;
     struct sockaddr_in server_addr;
     server_addr.sin_family = AF_INET;
     server_addr.sin_addr.s_addr = inet_addr("192.168.0.119");
@@ -88,6 +87,7 @@ void* threadAndroid(void* param) {
         }
         (static_cast<Jugador*>(info->getMembers()))->setX(atoi(a.c_str()));
         (static_cast<Jugador*>(info->getMembers()))->setY(atoi(b.c_str()));
+        upd.actualizarObjetos(info->getMembers());
         pthread_mutex_unlock(&(info->mutex));
         pthread_cond_signal(&(info->androidCond));
         usleep(500);
